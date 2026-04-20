@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 AI Contracts POC — local Python pipeline for contract ingestion, LLM field extraction, rules-based risk flagging, and Coupa staging. Demo deadline: Thursday April 24, 2026. Owner: Braden Jones. All code is written by Claude Code; Braden owns architecture decisions.
 
-**LLM:** LiteLLM local proxy (`http://localhost:4000`) — configured via env vars, no hardcoded keys.  
+**LLM:** LiteLLM **hosted proxy** (not localhost) — URL, API key, and model name all read from env vars, no hardcoded values.  
 **Storage:** Excel files only (no GCP for POC).  
 **OCR:** `pdfplumber` (text PDFs) + `pytesseract` fallback (scanned/image PDFs).
 
@@ -86,7 +86,7 @@ Log `INFO` at start/end of each major step: `[STEP N] Starting...` / `[STEP N] C
 
 ### LiteLLM Call Pattern
 
-All LLM calls go through the local LiteLLM proxy. Config from `config.py`:
+All LLM calls go through the hosted LiteLLM proxy. `config.py` needs `LITELLM_API_KEY` added (not present yet — add in Session 3). Call pattern:
 
 ```python
 import litellm
@@ -94,6 +94,7 @@ response = litellm.completion(
     model=LITELLM_MODEL,
     messages=[...],
     api_base=LITELLM_API_BASE,
+    api_key=LITELLM_API_KEY,
     max_tokens=MAX_TOKENS_EXTRACTION,
 )
 ```
@@ -110,9 +111,24 @@ The output workbook has 5 header rows (Business Entity, Contact, Address, BE Ext
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `LITELLM_MODEL` | `gpt-4o` | Model sent to LiteLLM proxy |
-| `LITELLM_API_BASE` | `http://localhost:4000` | LiteLLM proxy URL |
+| `LITELLM_MODEL` | `gpt-4o` | Exact model name as returned by proxy `/models` endpoint |
+| `LITELLM_API_BASE` | `http://localhost:4000` | Hosted proxy URL — must be set, default is wrong |
+| `LITELLM_API_KEY` | *(none)* | Bearer key for the hosted proxy — **not in config.py yet, add in Session 3** |
 | `TESSERACT_PATH` | `C:\Program Files\Tesseract-OCR\tesseract.exe` | Tesseract binary path |
+
+**LiteLLM proxy notes (confirmed 2026-04-20):**
+- Proxy is hosted remotely, not on localhost — do not attempt to start `litellm` CLI
+- Health check: `/health` returns 404 on this proxy — use `/models` instead
+- Auth: all requests require `Authorization: Bearer $env:LITELLM_API_KEY` header
+- Verify before running Session 3: `Invoke-WebRequest -Uri "$env:LITELLM_API_BASE/models" -Headers @{Authorization="Bearer $env:LITELLM_API_KEY"} | Select-Object -ExpandProperty Content`
+- Model name must match exactly what the `/models` response returns
+
+Set all three permanently in PowerShell (once, then they persist):
+```powershell
+[System.Environment]::SetEnvironmentVariable("LITELLM_API_BASE", "https://your-proxy-url", "User")
+[System.Environment]::SetEnvironmentVariable("LITELLM_API_KEY",  "your-sk-key",            "User")
+[System.Environment]::SetEnvironmentVariable("LITELLM_MODEL",    "model-name-from-list",   "User")
+```
 
 Tesseract must be installed separately on Windows before OCR fallback works. Installer: https://github.com/UB-Mannheim/tesseract/wiki
 
@@ -148,7 +164,7 @@ git commit -m "Session [N]: [brief description]"
 
 ## Current Build State
 
-See `PROGRESS.md` for session-by-session status. Session 1 is complete. Session 2 target: write and run `02_intake.py` and `03_extract_text.py`.
+Sessions 1 and 2 complete. Session 3 target: write and run `04_extract_fields.py` (LiteLLM field extraction).
 
 **Approval checkpoints before proceeding:**
 - After first extraction run (Session 3): spot-check extracted_fields.xlsx for evidence quality

@@ -55,6 +55,20 @@
 - True image-based PDF simulation requires poppler (pdf2image) — CTR-015 is text-based in current POC
 - Session 3 next: write and run 04_extract_fields.py (LiteLLM field extraction)
 
+**LiteLLM pre-work required before Session 3:**
+- Proxy is hosted remotely (not localhost) — confirmed reachable and responding
+- Correct models endpoint: `$env:LITELLM_API_BASE/models` (not `/health`, not `/v1/models`)
+- Auth required: `Authorization: Bearer <key>` header on all requests
+- To verify proxy before Session 3: `Invoke-WebRequest -Uri "$env:LITELLM_API_BASE/models" -Headers @{Authorization="Bearer $env:LITELLM_API_KEY"} | Select-Object -ExpandProperty Content`
+- `config.py` needs `LITELLM_API_KEY` added — not present yet; Claude Code will add in Session 3
+- Set env vars permanently so they survive PowerShell restarts:
+  ```powershell
+  [System.Environment]::SetEnvironmentVariable("LITELLM_API_BASE", "https://your-proxy-url", "User")
+  [System.Environment]::SetEnvironmentVariable("LITELLM_API_KEY",  "your-sk-key",            "User")
+  [System.Environment]::SetEnvironmentVariable("LITELLM_MODEL",    "model-name-from-list",   "User")
+  ```
+- Model name must be confirmed from the `/models` response before Session 3 begins
+
 **Verified outputs:**
 - `outputs/contract_catalog.xlsx`: 15 rows (CTR-001 through CTR-015)
 - `outputs/contract_text/`: 15 .txt files, all readable
