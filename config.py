@@ -31,6 +31,7 @@ RULES_XLSX = PROJECT_ROOT / "rules.xlsx"
 # LiteLLM — reads from environment variables, no hardcoded keys
 LITELLM_MODEL    = os.environ.get("LITELLM_MODEL",    "gpt-4o")
 LITELLM_API_BASE = os.environ.get("LITELLM_API_BASE", "http://localhost:4000")
+LITELLM_API_KEY  = os.environ.get("LITELLM_API_KEY",  "")
 
 # Tesseract (Windows)
 TESSERACT_PATH = os.environ.get(
