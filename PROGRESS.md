@@ -33,3 +33,33 @@
 **Git commit:** `Session 1: Scaffold + mock contracts`
 
 ---
+
+## Session 2 -- 2026-04-20 -- Intake + Text Extraction Pipeline
+
+**What was built:**
+- `CLAUDE.md` — session instructions for Claude Code in this repo
+- `scripts/02_intake.py` — contract intake and catalog generation
+- `scripts/03_extract_text.py` — text extraction + page map generation
+
+**Scripts added:**
+- `02_intake.py`: Scans `contracts/` (falls back to `mock_contracts/` if empty), assigns ContractIDs, writes `outputs/contract_catalog.xlsx`
+- `03_extract_text.py`: Extracts text via pdfplumber (PDFs) or python-docx (DOCX) with pytesseract OCR fallback when text yield < 100 chars; outputs `contract_text/*.txt` and `page_maps/*.json`
+
+**Key decisions made:**
+- Intake preserves existing CTR-xxx IDs from mock contract filenames via regex — avoids re-assigning IDs to files that already carry them
+- 03_extract_text.py uses a two-pass approach for PDFs: quick pdfplumber peek first, then OCR fallback if needed, rather than attempting OCR on every PDF
+- CTR-015 extracted via pdfplumber (text PDF, not true image scan) — OCR fallback not triggered; expected per Session 1 notes
+
+**Known issues / open items:**
+- Tesseract still not installed — CTR-015 OCR fallback path is untested; install before demo or pre-verify
+- True image-based PDF simulation requires poppler (pdf2image) — CTR-015 is text-based in current POC
+- Session 3 next: write and run 04_extract_fields.py (LiteLLM field extraction)
+
+**Verified outputs:**
+- `outputs/contract_catalog.xlsx`: 15 rows (CTR-001 through CTR-015)
+- `outputs/contract_text/`: 15 .txt files, all readable
+- `outputs/page_maps/`: 15 .json files with page-level text
+
+**Git commit:** `Session 2: Intake + text extraction pipeline`
+
+---
