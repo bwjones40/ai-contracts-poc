@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "fields": [
+    { "name": "Supplier", "description": "Primary supplier or vendor party name", "type": "string", "required": true },
+    { "name": "ContractType", "description": "Type of contract (e.g., Master Service Agreement, NDA, Statement of Work, Purchase Agreement)", "type": "string", "required": true },
+    { "name": "EffectiveDate", "description": "Contract start or effective date in ISO 8601 format (YYYY-MM-DD)", "type": "date", "required": true },
+    { "name": "ExpirationDate", "description": "Contract end or expiration date in ISO 8601 format (YYYY-MM-DD)", "type": "date", "required": true },
+    { "name": "ContractValue", "description": "Total contract value or maximum commitment amount", "type": "string", "required": false },
+    { "name": "BusinessEntity", "description": "Internal company entity or business unit this contract is associated with", "type": "string", "required": true },
+    { "name": "GoverningLaw", "description": "State or jurisdiction governing this contract", "type": "string", "required": false },
+    { "name": "PaymentTerms", "description": "Payment terms (e.g., Net 30, Net 60, upon delivery)", "type": "string", "required": false },
+    { "name": "AutoRenewal", "description": "Whether the contract contains an auto-renewal clause. Return PRESENT or NOT_FOUND.", "type": "string", "required": false },
+    { "name": "LiabilityCap", "description": "Whether the contract contains a liability cap clause. Return PRESENT or NOT_FOUND.", "type": "string", "required": false },
+    { "name": "TerminationClause", "description": "Whether the contract contains a termination for convenience clause. Return PRESENT or NOT_FOUND.", "type": "string", "required": false }
+  ]
+}
