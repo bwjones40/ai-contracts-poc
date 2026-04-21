@@ -164,9 +164,9 @@ git commit -m "Session [N]: [brief description]"
 
 ## Current Build State
 
-Sessions 1 and 2 complete. Session 3 target: write and run `04_extract_fields.py` (LiteLLM field extraction).
+Sessions 1–5 complete. Session 6 target: `run_pipeline.py` orchestrator + Power BI setup.
 
-**Approval checkpoints before proceeding:**
-- After first extraction run (Session 3): spot-check extracted_fields.xlsx for evidence quality
-- After validation Excel (Session 5): verify conditional formatting and FinalValue formula
-- After BE Load File generation (Session 5): verify format matches Coupa spec
+**Approval checkpoints before Session 6:**
+- Open validation_review.xlsx — verify conditional formatting (red/yellow/green) and FinalValue formula
+- Manually approve 3 contracts, run `python scripts/08_coupa_artifact.py` — verify coupa_ready.xlsx has those 3 rows
+- If source_business_entities.xlsx is available: run `python scripts/00_build_be_load_file.py` and verify format against Coupa spec

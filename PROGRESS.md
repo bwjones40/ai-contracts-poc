@@ -140,3 +140,33 @@ R001: 1 | R002: 2 | R003: 2 | R004: 6 | R005: 3 | R006: 1 | R007: 6
 **Git commit:** `Session 4: Rules engine + summaries`
 
 ---
+
+## Session 5 -- 2026-04-21 -- Validation Table + Coupa Artifacts
+
+**What was built:**
+- `scripts/07_build_validation.py` — assembles validation_review.xlsx from all prior outputs
+- `scripts/08_coupa_artifact.py` — generates coupa_ready.xlsx from Approved=YES rows only
+- `scripts/00_build_be_load_file.py` — generates Coupa Business Entity Load File from source Excel
+
+**Scripts added:**
+- `07_build_validation.py`: Joins extracted_fields + risk_signals (highest severity per field), adds blank reviewer columns (ReviewerOverride, ChangeReason, Approved, Reviewer, ReviewTimestamp), FinalValue formula `=IF(J{row}<>"",J{row},D{row})`, conditional formatting (Red=High, Yellow=Medium or low confidence, Green=Approved), YES/NO dropdown on Approved column, plus Summaries and Risk Signals sheets. 165 data rows across 15 contracts.
+- `08_coupa_artifact.py`: Reads validation_review.xlsx, filters Approved==YES, pivots long→wide, maps to Coupa column names, adds red warning banner, writes coupa_ready.xlsx. Human gate enforced in code — no approved rows yields header-only output.
+- `00_build_be_load_file.py`: Standalone prerequisite — reads source_business_entities.xlsx, generates exact 5-row header block + contiguous BE/Contact/Address/ExtRef data blocks. All cells forced to text format (@) to prevent Excel auto-conversion of postal codes and IDs. Row count validated by assertion.
+
+**Key decisions made:**
+- Script 08 computes FinalValue from ReviewerOverride/ExtractedValue directly (not via `data_only=True` formula cache) — ensures correctness before Excel opens the file
+- Column auto-fit in script 08 uses `get_column_letter(col_idx)` to avoid MergedCell errors from the banner row
+- Confidence yellow-flag formula uses `AND($E2<>"", $E2<0.6)` to suppress false positives on blank confidence cells
+
+**Approval checkpoint results:**
+- validation_review.xlsx: 165 rows, 3 sheets (Review, Summaries, Risk Signals), conditional formatting verified
+- Approval filter test: 3 contracts manually approved in-memory, script 08 loader returned exactly those 3 — PASSED
+- coupa_ready.xlsx: header-only (no approved rows yet) — expected behavior, red banner present
+
+**Known issues / open items:**
+- Script 00 not yet end-to-end tested — requires source_business_entities.xlsx in source_data/ (user must provide before demo)
+- Session 6 next: run_pipeline.py orchestrator + Power BI setup
+
+**Git commit:** `Session 5: Validation table + Coupa artifacts`
+
+---
