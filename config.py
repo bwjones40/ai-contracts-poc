@@ -40,7 +40,7 @@ TESSERACT_PATH = os.environ.get(
 )
 
 # Pipeline parameters
-MAX_TOKENS_EXTRACTION       = 2000
+MAX_TOKENS_EXTRACTION       = 4096
 MAX_TOKENS_SUMMARY          = 500
 CONFIDENCE_THRESHOLD_WARN   = 0.6
 OCR_MIN_TEXT_LENGTH         = 100   # chars; below this triggers pytesseract fallback

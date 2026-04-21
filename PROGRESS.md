@@ -77,3 +77,31 @@
 **Git commit:** `Session 2: Intake + text extraction pipeline`
 
 ---
+
+## Session 3 -- 2026-04-21 -- LLM Field Extraction
+
+**What was built:**
+- `scripts/04_extract_fields.py` — LiteLLM structured field extraction pipeline
+
+**Scripts added:**
+- `04_extract_fields.py`: Reads contract_catalog.xlsx + page_maps/*.json, calls LiteLLM hosted proxy for all 11 schema fields, writes outputs/extracted_fields.xlsx (165 rows, long format: one row per field per contract). Invalid JSON triggers one retry with repair prompt; second failure marks all fields EXTRACTION_FAILED. Low confidence and truncation events logged to WARNING.
+
+**Key decisions made:**
+- MAX_TOKENS_EXTRACTION raised from 2000 to 4096 — 2000 was insufficient for 11-field JSON responses; 3 contracts failed on first run, 0 on second run after the fix
+- LiteLLM model: gemini/gemini-3-flash-preview via hosted proxy at LITELLM_API_BASE
+- Low confidence (0.00) warnings on AutoRenewal/LiabilityCap/TerminationClause for contracts where the field returned null — model behavior; expected for NOT_FOUND clause checks
+- strip_json_fences() added to handle markdown code fence wrapping from some model responses
+
+**Spot-check results (approval checkpoint):**
+- CTR-001: All 11 fields extracted, evidence snippets are real quotes from contract text, confidence 0.95 across all found fields
+- CTR-013 AutoRenewal: "Successive one-year terms" (confidence 0.98) — auto-renewal clause correctly detected (expected: R006 fires in Session 4)
+- CTR-014 ExpirationDate: "TBD" extracted — missing expiration scenario intact (expected: R001 fires in Session 4)
+- 15/15 contracts succeeded, 0 failures
+
+**Known issues / open items:**
+- CTR-014 ExpirationDate returns "TBD" instead of null — rules engine in Session 4 should handle "TBD" as non-date gracefully
+- Low confidence (0.00) on null/NOT_FOUND fields is a model behavior, not a code issue — rule R010 will correctly flag these in Session 4
+
+**Git commit:** `Session 3: LLM field extraction`
+
+---
