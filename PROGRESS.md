@@ -105,3 +105,38 @@
 **Git commit:** `Session 3: LLM field extraction`
 
 ---
+
+## Session 4 -- 2026-04-21 -- Rules Engine + Summaries
+
+**What was built:**
+- `rules.xlsx` — seed rules table (10 rules, editable by business users)
+- `scripts/05_run_rules.py` — data-driven rules engine
+- `scripts/06_summarize.py` — LiteLLM plain-language summarizer
+
+**Scripts added:**
+- `05_run_rules.py`: Loads enabled rules from rules.xlsx, evaluates extracted fields for all 15 contracts, writes outputs/risk_signals.xlsx. 21 signals generated across 7 rule types.
+- `06_summarize.py`: Calls LiteLLM for each contract, generates 3-5 sentence business-reader summary, writes outputs/summaries.xlsx. 15/15 contracts succeeded with retry logic handling transient None responses.
+
+**Key decisions made:**
+- clause_check "present" logic broadened: fires if value is non-empty and not "NOT_FOUND" (not just exact "PRESENT" match). Required because LLM returns descriptive text (e.g., "Successive one-year terms") instead of the canonical "PRESENT" token — which still means the clause is present.
+- Retry logic added to 06_summarize.py: one retry with 2s delay on None LLM response (transient model behavior observed on 2-3 contracts per run).
+
+**Approval checkpoint results:**
+- R001 fired on CTR-014 (ExpirationDate = "TBD") -- YES
+- R004 fired on CTR-012 (ExpirationDate = 2024-12-31, past due) -- YES
+- R005 fired on CTR-010 (2026-05-15) and CTR-011 (2026-06-01) -- YES
+- R006 fired on CTR-013 (AutoRenewal = "Successive one-year terms") -- YES (after clause_check fix)
+- R007 fired on 6 contracts missing LiabilityCap
+- All 21 signals correctly attributed
+
+**Full signal breakdown:**
+R001: 1 | R002: 2 | R003: 2 | R004: 6 | R005: 3 | R006: 1 | R007: 6
+
+**Known issues / open items:**
+- LLM occasionally returns None content on first attempt (transient) — retry handles it
+- CTR-014 ExpirationDate = "TBD" (not null) — is_null_value() treats "TBD" as null; R001 fires correctly
+- Session 5 next: 07_build_validation.py + 08_coupa_artifact.py + 00_build_be_load_file.py
+
+**Git commit:** `Session 4: Rules engine + summaries`
+
+---
